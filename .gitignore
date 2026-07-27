@@ -1,0 +1,55 @@
+# Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+
+.venv/
+venv/
+env/
+
+# Environment Variables
+
+.env
+.env.*
+
+# VS Code
+
+.vscode/
+
+# Jupyter Notebook Checkpoints
+
+.ipynb_checkpoints/
+
+# Python Distribution
+
+build/
+dist/
+*.egg-info/
+
+# Testing
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+
+*.log
+
+# OS Files
+
+.DS_Store
+Thumbs.db
+
+# Snowflake
+
+*.snowsql
+connections.toml
+
+# Local SQLite Databases
+
+*.db
+*.sqlite3
