@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 @dataclass 
-class Transactions:
+class Transaction:
     """
     Represents bankning transaction event
     """
@@ -15,6 +15,6 @@ class Transactions:
     transaction_type : str 
     transaction_timestamp: datetime
     status: str
-     
+
 
 
