@@ -1,3 +1,4 @@
+import time
 from event_generator.generators.customer_generator import generate_customer 
 from event_generator.generators.account_generator import generate_account
 from event_generator.generators.merchant_generator import generate_merchant
@@ -16,3 +17,15 @@ def run_simulation():
         "merchant":merchant,
         "transaction":transaction
     }
+
+
+def run_event_generator():
+    while True:
+        event=run_simulation()
+        print(event["customer"])
+        print(event["account"])
+        print(event["merchant"])
+        print(event["transaction"])
+        print("-" * 80)
+        time.sleep(1)
+      

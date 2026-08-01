@@ -17,4 +17,3 @@ class Transaction:
     status: str
 
 
-
