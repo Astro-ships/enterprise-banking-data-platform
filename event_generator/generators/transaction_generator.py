@@ -22,7 +22,9 @@ STATUSES = [
     "pending",
     "penDing",
     "SucESs",
-    " penDing"
+    " penDing",
+    "reversed",
+    "failed"
 ]
 
 
