@@ -4,5 +4,6 @@ from datetime import date
 class Merchant:
     merchant_id: str
     merchant_name: str
+    merchant_type: str
     country: str
     city: str
