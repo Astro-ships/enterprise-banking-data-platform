@@ -47,3 +47,16 @@ def generate_customers(total_customers : int):
         customer=generate_customer() 
         customers.append(customer)
     return customers 
+
+from event_generator.generators.account_generator import generate_account
+
+def generate_accounts(customers: int): 
+    """
+    Generate a list of accounts
+    """
+
+    accounts=[]
+    for customer in customers:
+        account=generate_account(customer.customer_id) 
+        accounts.append(account)
+    return accounts 
