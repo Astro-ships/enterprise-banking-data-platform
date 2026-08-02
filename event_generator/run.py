@@ -1,13 +1,8 @@
-from event_generator.controller import run_event_generator
-# #def main():
-#     result=run_simulation()
-
-#     print(result["customer"])
-#     print(result["account"])
-#     print(result["merchant"])
-#     print(result["transaction"])
+from event_generator.controller import  generate_customers
 
 def main():
-    run_event_generator()
+    customers= generate_customers(20000)
+    for customer in customers:
+        print(customer)
 if __name__=="__main__":
     main()
