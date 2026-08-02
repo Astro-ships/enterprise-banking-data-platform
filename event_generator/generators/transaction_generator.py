@@ -26,7 +26,11 @@ STATUSES = [
 ]
 
 
-def generate_transaction( source_account_id: str,merchant_id: str) -> Transaction:
+def generate_transaction(source_account_id: str,
+                        destination_account_id: str | None,
+                        merchant_id: str | None,
+                        transaction_type: str
+                        ) -> Transaction:
 
     """
     Generate a banking transaction event.
@@ -36,13 +40,13 @@ def generate_transaction( source_account_id: str,merchant_id: str) -> Transactio
 
         transaction_id=fake.uuid4(),
         source_account_id=source_account_id,
-        destination_account_id=None,
+        destination_account_id=destination_account_id,
         merchant_id=merchant_id,
         amount=round(random.uniform(1, 100000),2),
         currency=random.choice(["USD","PKR","EUR", "GBP"  ]),
-        transaction_type=random.choice(TRANSACTION_TYPES),
+        transaction_type=transaction_type,
         transaction_timestamp=datetime.now(),
-        status=random.choice( STATUSES)
+        status=random.choice(STATUSES)
 
     )
 
