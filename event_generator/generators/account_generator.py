@@ -73,83 +73,62 @@ def generate_account(customer_id: str) -> Account:
                 None
             ]
         ),
-
         account_type=random.choice(
             [
                 "Savings",
                 "saving",
                 "SAVINGS",
-
                 "Current",
                 "current",
                 "CURRENT",
-
                 "Checking",
                 "checking",
-
                 None
             ]
         ),
-
         currency=random.choice(
             [
                 "USD",
                 "usd",
                 "US Dollar",
                 "U.S. Dollar",
-
                 "PKR",
                 "pkr",
                 "Pakistani Rupee",
                 "Pak Rupee",
-
                 "GBP",
                 "gbp",
                 "British Pound",
-
                 "INR",
                 "Indian Rupee",
-
                 "MYR",
                 "Malaysian Ringgit",
-
                 None
             ]
         ),
-
         country=random.choice(
             [
                 "Pakistan",
                 "pakistan",
                 "PAKISTAN",
-
                 "United States",
                 "USA",
                 "US",
                 "America",
-
                 "United Kingdom",
                 "UK",
                 "Britain",
-
                 "Malaysia",
-
                 "India",
-
                 fake.country(),
-
                 None
             ]
         ),
-
         opening_date=fake.date_between(
             start_date="-10y",
             end_date="today"
         ),
-
         status=status,
-
         balance=balance
     )
-
     return account
