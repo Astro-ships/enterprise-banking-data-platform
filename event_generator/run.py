@@ -1,13 +1,14 @@
-from event_generator.controller import  generate_customers, generate_accounts
+from event_generator.controller import  generate_customers, generate_accounts,generate_merchants
 
 
 def main():
     customers= generate_customers(20000)   
     accounts=generate_accounts(customers)
+    merchants=generate_merchants(250)
 
     print(f"Customers: {len(customers)}")
     print(f"Accounts: {len(accounts)}")
-
+    print(f"Merchants: {len(merchants)}")
     # print("\nFirst 5 Customers")
     # for customer in customers[:5]:
     #     print(customer)

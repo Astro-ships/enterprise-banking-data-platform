@@ -38,3 +38,20 @@ def generate_accounts(customers):
             account=generate_account(customer.customer_id) 
             accounts.append(account)
     return accounts 
+
+# ==========================================================
+# Merchant Collection Generation
+# ==========================================================
+
+from event_generator.generators.merchant_generator import generate_merchant
+
+def generate_merchants(total_merchants :int):
+    """
+    Generate a collection of Merchant 
+    """
+    merchants=[]
+    for _ in range(total_merchants):
+        merchant=generate_merchant() 
+        merchants.append(merchant)
+
+    return merchants
