@@ -70,7 +70,6 @@ def generate_account(customer_id: str) -> Account:
                 fake.iban(),
                 fake.bban().replace("-", ""),
                 fake.bban().replace(" ", ""),
-                None
             ]
         ),
         account_type=random.choice(
@@ -81,8 +80,11 @@ def generate_account(customer_id: str) -> Account:
                 "Current",
                 "current",
                 "CURRENT",
-                "Checking",
-                "checking",
+                "CUrentg",
+                "curreng",
+                "Current",
+                "business",
+                "Loan",
                 None
             ]
         ),
