@@ -62,7 +62,11 @@ def generate_merchants(total_merchants :int):
 # and merchants.
 import random
 from event_generator.generators.transaction_generator import generate_transaction
-
+TRANSACTION_TYPES = [
+    "PURCHASE",
+    "TRANSFER",
+    "ATM_WITHDRAWAL"
+]
 def generate_transactions(accounts,merchants,total_transactions: int):
     """
     Generate a collection of transaction record 
@@ -70,11 +74,48 @@ def generate_transactions(accounts,merchants,total_transactions: int):
     transactions=[]
 
     for _ in range(total_transactions):
+        transaction_type=random.choice(TRANSACTION_TYPES)
 
-        account=random.choice(accounts)
-        merchant=random.choice(merchants)
-        transaction=generate_transaction (
-            source_account_id=account.account_id,
-            merchant_id=merchant.merchant_id)
-        transactions.append(transaction)
+        # ==========================
+        # PURCHASE
+        # ==========================
+        if transaction_type=="PURCHASE":
+            source_account=random.choice(accounts)
+            merchant=random.choice(merchants)
+            transaction=generate_transaction( 
+                source_account_id=source_account.account_id,
+                destination_account_id=None,
+                merchant_id=merchant.merchant_id,
+                transaction_type=transaction_type)
+
+        # ==========================
+        # TRANSFER
+        # ==========================
+        elif transaction_type=="TRANSFER":
+            source_account=random.choice(accounts)
+            destination_account=random.choice(accounts)
+            # Prevent transferring to the same account
+            while destination_account.account_id==source_account.account_id:
+                destination_account=random.choice(accounts)
+
+            transaction=generate_transaction( 
+                source_account_id=source_account.account_id,
+                destination_account_id=destination_account,
+                merchant_id=None,
+                transaction_type=transaction_type)
+
+        # ==========================
+        # ATM WITHDRAWAL
+        # ==========================
+
+        else: 
+            source_account=random.choice(accounts)
+
+            transaction = generate_transaction(
+                source_account_id=source_account.account_id,
+                destination_account_id=None,
+                merchant_id=merchant.merchant_id,
+                transaction_type=transaction_type
+            )    
+        transactions.append(transaction)     
     return transactions
