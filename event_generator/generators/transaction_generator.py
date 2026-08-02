@@ -38,7 +38,7 @@ def generate_transaction( source_account_id: str,merchant_id: str) -> Transactio
         source_account_id=source_account_id,
         destination_account_id=None,
         merchant_id=merchant_id,
-        amount=round(random.uniform(1, 100000),),
+        amount=round(random.uniform(1, 100000),2),
         currency=random.choice(["USD","PKR","EUR", "GBP"  ]),
         transaction_type=random.choice(TRANSACTION_TYPES),
         transaction_timestamp=datetime.now(),
