@@ -55,3 +55,26 @@ def generate_merchants(total_merchants :int):
         merchants.append(merchant)
 
     return merchants
+# ==========================================================
+# Transaction Collection Generation
+# ==========================================================
+# Generates banking transactions using existing accounts
+# and merchants.
+import random
+from event_generator.generators.transaction_generator import generate_transaction
+
+def generate_transactions(accounts,merchants,total_transactions: int):
+    """
+    Generate a collection of transaction record 
+    """
+    transactions=[]
+
+    for _ in range(total_transactions):
+
+        account=random.choice(accounts)
+        merchant=random.choice(merchants)
+        transaction=generate_transaction (
+            source_account_id=account.account_id,
+            merchant_id=merchant.merchant_id)
+        transactions.append(transaction)
+    return transactions
