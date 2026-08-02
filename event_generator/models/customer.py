@@ -15,3 +15,8 @@ class Customer:
     date_of_birth: date
     country: str
     city: str
+    address: str 
+    postal_code: str 
+    email : str 
+    phone_number : str 
+    customer_since : date 

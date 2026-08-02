@@ -14,6 +14,15 @@ def generate_customer() -> Customer :
         ),
         country=fake.country(),
         city=fake.city(),
+        address = fake.street_address(),
+        postal_code=fake.postcode(),
+        phone_number=fake.phone_number(),
+        email=fake.email(),
+        customer_since=fake.date_between(start_date='-6y',
+                                         end_date='today')
+
+
+
 
     )
     return customer
