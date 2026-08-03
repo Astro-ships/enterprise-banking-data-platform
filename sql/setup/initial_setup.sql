@@ -1,0 +1,26 @@
+-- ===================================
+-- Configure Snowflake Session 
+-- ===================================
+
+CREATE WAREHOUSE IF NOT EXISTS compute_wh
+WAREHOUSE_SIZE ='small' 
+INITIALLY_SUSPENDED=TRUE 
+AUTO_SUSPEND = 600 
+AUTO_RESUME = TRUE 
+SCALING_POLICY=STANDARD 
+MIN_CLUSTER_COUNT=1
+MAX_CLUSTER_COUNT=4;
+-- -------------
+CREATE DATABASE IF NOT EXISTS BANKING;
+CREATE SCHEMA IF NOT EXISTS RAW;
+CREATE SCHEMA IF NOT EXISTS SILVER;
+CREATE SCHEMA IF NOT EXISTS GOLD;
+USE SCHEMA RAW;
+CREATE STAGE IF NOT EXISTS bank_stage;
+-- ===============================
+-- File_format 
+-- ==============================
+-- for COPY INTO
+CREATE FILE FORMAT IF NOT EXISTS json_format
+TYPE='json';
+
