@@ -1,6 +1,7 @@
 -- ===================================
 -- Configure Snowflake Session 
 -- ==================================
+USE ROLE ACCOUNTADMIN;
 USE WAREHOUSE compute_wh;
 USE DATABASE BANKING;
 USE SCHEMA RAW;
