@@ -60,3 +60,17 @@ FROM RAW.RAW_CUSTOMERS;
 -- ====================
 SELECT * FROM BRONZE_CUSTOMERS
 LIMIT 5;
+
+-- ==========================================================
+-- Development Note
+-- ==========================================================
+-- During development, the customer Bronze transformation
+-- exhibited inconsistent behavior when using CTAS directly
+-- from the VARIANT column, while the same approach worked
+-- correctly for the other entities (Accounts, Merchants,
+-- Transactions).
+--
+-- The Bronze schema remains identical to the intended design.
+-- This implementation is temporary and will be revisited while
+-- investigating the underlying cause.
+-- ==========================================================
