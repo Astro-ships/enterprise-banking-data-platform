@@ -100,7 +100,7 @@ def generate_transactions(accounts,merchants,total_transactions: int):
 
             transaction=generate_transaction( 
                 source_account_id=source_account.account_id,
-                destination_account_id=destination_account,
+                destination_account_id=destination_account.account_id,
                 merchant_id=None,
                 transaction_type=transaction_type)
 
