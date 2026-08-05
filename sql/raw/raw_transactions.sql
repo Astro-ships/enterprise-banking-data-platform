@@ -17,6 +17,6 @@ CREATE TABLE IF NOT EXISTS RAW_TRANSACTIONS(
 -- Load data into transactions 
 -- ===========================
 
-COPY INTO RAW_MERCHANTS 
+COPY INTO RAW_TRANSACTIONS 
 FROM @bank_stage/transactions.ndjson.gz
 FILE_FORMAT=json_format;
