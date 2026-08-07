@@ -9,7 +9,7 @@ USE SCHEMA RAW;
 -- Create table using Snowflake Variant Feature
 -- ============================================
 
-CREATE TABLE IF NOT EXISTS RAW_TRANSACTIONS(
+CREATE OR REPLACE TABLE RAW_TRANSACTIONS(
     RAW_RECORD VARIANT
 );
 

@@ -12,7 +12,7 @@ USE SCHEMA BRONZE;
 CREATE OR REPLACE TABLE BRONZE.bronze_transactions 
 AS 
     SELECT 
-            RAW_RECORD:transactions_id::STRING AS transactions_id,
+            RAW_RECORD:transaction_id::STRING AS transaction_id,
             RAW_RECORD:source_account_id::STRING AS source_account_id,
             RAW_RECORD:destination_account_id::STRING AS destination_account_id,
             RAW_RECORD:merchant_id::STRING AS merchant_id,
@@ -26,5 +26,5 @@ FROM RAW.RAW_TRANSACTIONS;
 -- ================
 -- Validate table
 -- =============== 
-SELECT * FROM bronze_transactions
+SELECT * FROM BRONZE.bronze_transactions
 LIMIT 5;
