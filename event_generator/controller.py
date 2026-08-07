@@ -71,6 +71,13 @@ def generate_transactions(accounts,merchants,total_transactions: int):
     """
     Generate a collection of transaction record 
     """
+    ACTIVE_STATUSES = [
+                        "ACTIVE",
+                        "Active",
+                        "active",
+                        "ACT",
+                        "Act"
+    ]
     transactions=[]
 
     for _ in range(total_transactions):
@@ -80,42 +87,53 @@ def generate_transactions(accounts,merchants,total_transactions: int):
         # PURCHASE
         # ==========================
         if transaction_type=="PURCHASE":
+            # Only active accounts are allowed to initiate transactions.
             source_account=random.choice(accounts)
+            while source_account.status not in ACTIVE_STATUSES:
+                source_account = random.choice(accounts)
             merchant=random.choice(merchants)
             transaction=generate_transaction( 
                 source_account_id=source_account.account_id,
                 destination_account_id=None,
                 merchant_id=merchant.merchant_id,
-                transaction_type=transaction_type)
+                transaction_type=transaction_type,
+                currency=source_account.currency)
 
         # ==========================
         # TRANSFER
         # ==========================
         elif transaction_type=="TRANSFER":
-            source_account=random.choice(accounts)
+            source_account = random.choice(accounts)
+            while source_account.status not in ACTIVE_STATUSES:
+                source_account = random.choice(accounts)
             destination_account=random.choice(accounts)
-            # Prevent transferring to the same account
-            while destination_account.account_id==source_account.account_id:
+            # Prevent transferring to the same account 
+            # Only active accounts are allowed to initiate transactions.
+            while (destination_account.account_id==source_account.account_id
+                   or destination_account.status not in ACTIVE_STATUSES):
                 destination_account=random.choice(accounts)
 
             transaction=generate_transaction( 
                 source_account_id=source_account.account_id,
                 destination_account_id=destination_account.account_id,
                 merchant_id=None,
-                transaction_type=transaction_type)
+                transaction_type=transaction_type,
+                currency=source_account.currency)
 
         # ==========================
         # ATM WITHDRAWAL
         # ==========================
 
         else: 
-            source_account=random.choice(accounts)
-
+            source_account = random.choice(accounts)
+            while source_account.status not in ACTIVE_STATUSES:
+                source_account = random.choice(accounts)
             transaction = generate_transaction(
                 source_account_id=source_account.account_id,
                 destination_account_id=None,
                 merchant_id=None,
-                transaction_type=transaction_type
+                transaction_type=transaction_type,
+                currency=source_account.currency
             )    
         transactions.append(transaction)     
     return transactions

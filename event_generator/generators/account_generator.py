@@ -104,8 +104,8 @@ def generate_account(customer_id: str) -> Account:
                 "INR",
                 "Indian Rupee",
                 "MYR",
-                "Malaysian Ringgit",
-                None
+                "Malaysian Ringgit"
+                
             ]
         ),
         country=random.choice(

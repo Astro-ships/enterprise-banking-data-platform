@@ -31,7 +31,8 @@ STATUSES = [
 def generate_transaction(source_account_id: str,
                         destination_account_id: str | None,
                         merchant_id: str | None,
-                        transaction_type: str
+                        transaction_type: str,
+                        currency:str
                         ) -> Transaction:
 
     """
@@ -45,7 +46,7 @@ def generate_transaction(source_account_id: str,
         destination_account_id=destination_account_id,
         merchant_id=merchant_id,
         amount=round(random.uniform(1, 100000),2),
-        currency=random.choice(["USD","PKR","EUR", "GBP"  ]),
+        currency=currency,
         transaction_type=transaction_type,
         transaction_timestamp=datetime.now(),
         status=random.choice(STATUSES)
