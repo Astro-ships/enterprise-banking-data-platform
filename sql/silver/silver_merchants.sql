@@ -150,32 +150,17 @@ INITCAP(TRIM(LOWER(bm.merchant_name))) = ml.incorrect_name;
 -- Most of the inconsistencies are almost rectified. If further more inconsistency is found,
 -- just update the lookup table.
 -- ================================================================
--- Creating Surrogate key
--- =============================================================
-CREATE OR REPLACE SEQUENCE merchant_key_sq 
-START = 1
-INCREMENT = 1;
-CREATE OR REPLACE TABLE merchant_surrogate 
-AS 
-   SELECT DISTINCT
-            merchant_key_sq.NEXTVAL AS merchant_key,
-            merchant_id 
-   FROM BRONZE.BRONZE_MERCHANTS;
 -- ========================================================
 --  Create table: Silver_merchants 
 -- ========================================================
 CREATE OR REPLACE TABLE SILVER.silver_merchants 
 AS 
 SELECT 
-         ms.merchant_key,
          bm.merchant_id,
 COALESCE(ml.correct_name , INITCAP(TRIM(LOWER(bm.merchant_name)))) AS merchant_name,
          bm.city,
          bm.country
 FROM BRONZE.BRONZE_MERCHANTS AS bm
-INNER JOIN merchant_surrogate AS ms 
-ON 
-   bm.merchant_id=ms.merchant_id
 LEFT JOIN merchant_lookup as ml 
 ON 
 INITCAP(TRIM(LOWER(bm.merchant_name))) = ml.incorrect_name;
@@ -189,5 +174,4 @@ SELECT
       (SELECT COUNT(*) FROM SILVER_MERCHANTS) AS  silver_rows;
 -- ------------------------------------------
 SELECT * FROM SILVER_MERCHANTS
-ORDER BY merchant_key
 LIMIT 10;

@@ -105,7 +105,7 @@ WHERE LENGTH(postal_code)=4;
 -- ======================
 -- Inspect phone numbers
 -- =====================
-SELECT PHONE_NUMBER FROM BRONZE_CUSTOMERS LIMIT 10;
+SELECT PHONE_NUMBER FROM BRONZE.BRONZE_CUSTOMERS LIMIT 10;
 -- ===============================================================
 -- NOTE: (Flagged for transformation)
 -- ===============================================================
@@ -124,10 +124,7 @@ SELECT PHONE_NUMBER FROM BRONZE_CUSTOMERS LIMIT 10;
 
 -- =========================================================
 --  DATA TRANSFORMATION AND TABLE CREATIONG
--- =========================================================
-
-
-
+-- ========================================================
 -- =========================================================
 -- Surrogate Key Generation
 -- =========================================================
@@ -140,7 +137,7 @@ CREATE SEQUENCE IF NOT EXISTS customer_key_seq
   START =1
   INCREMENT = 1;
 
-CREATE TABLE IF NOT EXISTS  customer_surrogate
+CREATE OR REPLACE TABLE  customer_surrogate
 AS
 SELECT 
         customer_key_seq.NEXTVAL as customer_key,
@@ -178,14 +175,7 @@ LIMIT 100;
 
 -- Implement the transformation to create table
 -- ------------------------------------------------
--- Create Silver Layer table with surrogate keys 
--- ===============================================
-
-CREATE SEQUENCE IF NOT EXISTS customer_key_seq
-  START =1
-  INCREMENT = 1;
-
-CREATE TABLE IF NOT EXISTS  customer_surrogate
+CREATE OR REPLACE TABLE customer_surrogate
 AS
 SELECT 
         customer_key_seq.NEXTVAL as customer_key,
@@ -195,7 +185,6 @@ FROM  BRONZE.BRONZE_customers;
 CREATE OR REPLACE TABLE  SILVER.SILVER_CUSTOMERS 
 AS 
 SELECT 
-         cs.customer_key,
          bc.customer_id,
          bc.FIRST_NAME,
          bc.LAST_NAME,
@@ -220,10 +209,7 @@ SELECT
                                 bc.PHONE_NUMBER,'x',1),'[^0-9+]','') AS phone_number,
                                 bc.CUSTOMER_SINCE
 
-FROM BRONZE.bronze_customers AS bc 
-INNER JOIN CUSTOMER_SURROGATE AS cs
-ON 
-bc.customer_id=cs.customer_id;
+FROM BRONZE.bronze_customers AS bc ;
 -- =========================================
 --  Validate table 
 -- =========================================
