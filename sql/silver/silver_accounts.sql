@@ -90,9 +90,11 @@ FROM BRONZE.BRONZE_ACCOUNTS;
 -- Inspect 
 SELECT DISTINCT COUNTRY
 FROM BRONZE.BRONZE_ACCOUNTS;
+SELECT COUNT(*) FROM BRONZE.BRONZE_ACCOUNTS
+WHERE COUNTRY IS NULL;
 -- ---------------------------------------------
 -- Result:
--- Standardized data with no nulls found
+-- UnStandardized data with  nulls found
 -- ---------------------------------------------
 -- ====================
 -- 7: OPENING_DATE
@@ -283,9 +285,9 @@ ON
 TRIM(BA.STATUS)=SL.INCORRECT_VALUE;
 
 -- ================================
--- Create Table 
+-- Create Table Version 1
 -- ================================
-CREATE OR REPLACE TABLE SILVER.SILVER_ACCOUNTS
+CREATE OR REPLACE TABLE SILVER.SILVER_ACCOUNTS_Version_1
 AS 
 SELECT 
         ACCOUNT_ID,
@@ -311,14 +313,65 @@ INITCAP(TRIM(LOWER(BA.ACCOUNT_TYPE)))=AL.INCORRECT_VALUE
 LEFT JOIN SILVER.ACCOUNT_CURRENCY_LOOKUP AS CL 
 ON
 TRIM(BA.CURRENCY)=CL.INCORRECT_VALUE;
-
- -- ======================================
- -- Validate 
- -- ======================================
+-- ====================================================================================================================
+-- ==============================
+-- DATA PROFILING 
+-- ===============================
+-- 5: Country
+-- ===============================
+-- Inspecting the currency of the
+-- country to see 
+-- Note: This inconsistency was found during the gold phase of the project
+SELECT
+    CURRENCY,
+    COUNT(*) AS null_country_count
+FROM SILVER.SILVER_ACCOUNTS_VERSION_1
+WHERE COUNTRY IS NULL
+GROUP BY CURRENCY
+ORDER BY null_country_count DESC;
+ -- =======================================================================================
+ -- Note:
+ -- why Version ?: Inconsistent country and nulls found were found later on in the project
+ --  so therefore the transformation occured in 2 steps. 
+ -- Create new silver table from the current silver table
+ -- ========================================================================================
+-- ================================
+-- Create Table (stable)
+-- ================================
+CREATE OR REPLACE TABLE SILVER.SILVER_ACCOUNTS 
+AS 
+    SELECT 
+            ACCOUNT_ID,
+            CUSTOMER_ID,
+            ACCOUNT_NUMBER,
+            ACCOUNT_TYPE,
+            CURRENCY,
+            COUNTRY,
+    CASE
+             WHEN COUNTRY IS NOT NULL THEN COUNTRY
+             WHEN CURRENCY = 'PKR' THEN 'Pakistan'
+             WHEN CURRENCY = 'USD' THEN 'United States'
+             WHEN CURRENCY = 'GBP' THEN 'United Kingdom'
+             WHEN CURRENCY = 'EUR' THEN 'European Union'
+             WHEN CURRENCY = 'MYR' THEN 'Malaysia'
+            ELSE 'Undefined'
+    END AS standardized_country,
+            OPENING_DATE,
+            STATUS,
+            BALANCE
+    FROM SILVER.SILVER_ACCOUNTS_VERSION_1;
+-- --------------------------------------------
+-- Drop Version 1 table
+-- --------------------------------------------
+-- It is safe to drop the version 1 table 
+DROP TABLE  SILVER.SILVER_ACCOUNTS_VERSION_1;
+-- =========================================================================
+-- Validate Table
+-- ==========================================================================
  -- CHECK ROW COUNTS
  SELECT 
         (SELECT COUNT(*) FROM BRONZE.BRONZE_ACCOUNTS) AS Bronze_count,
         (SELECT COUNT(*) FROM SILVER.SILVER_ACCOUNTS) AS Silver_count;
--- ---------------
-SELECT * FROM SILVER_ACCOUNTS
+-- Inspect
+SELECT * FROM SILVER. SILVER_ACCOUNTS
 LIMIT 10;

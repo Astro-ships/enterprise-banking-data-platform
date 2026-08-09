@@ -58,8 +58,7 @@ The platform supports the following transaction types.
 | DEPOSIT          | Funds deposited into an account    |
 | WITHDRAWAL       | Funds withdrawn from an account    |
 | TRANSFER         | Funds transferred between accounts |
-| CARD_PAYMENT     | Card payment made to a merchant    |
-| LOAN_PAYMENT     | Payment made toward a loan         |
+
 
 ---
 

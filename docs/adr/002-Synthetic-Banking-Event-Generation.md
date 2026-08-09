@@ -98,7 +98,7 @@ This decision establishes a repeatable and scalable foundation for the entire pl
 
 ---
 
-Decision Date: 2026-08-02
+Decision Date: 2026-08-01
 
 Project Phase: Sprint 1 – Data Generation
 
