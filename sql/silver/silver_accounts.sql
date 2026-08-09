@@ -329,6 +329,35 @@ FROM SILVER.SILVER_ACCOUNTS_VERSION_1
 WHERE COUNTRY IS NULL
 GROUP BY CURRENCY
 ORDER BY null_country_count DESC;
+-------------------------------------------
+-- Create a look up table for inconsistent
+-- country names
+-------------------------------------------
+CREATE OR REPLACE TABLE SILVER.ACCOUNT_COUNTRY_LOOKUP (
+    incorrect_value VARCHAR,
+    correct_value VARCHAR
+);
+
+INSERT INTO SILVER.ACCOUNT_COUNTRY_LOOKUP
+    (incorrect_value, correct_value)
+VALUES
+    ('Pakistan', 'Pakistan'),
+    ('pakistan', 'Pakistan'),
+    ('PAKISTAN', 'Pakistan'),
+
+    ('United States', 'United States'),
+    ('USA', 'United States'),
+    ('US', 'United States'),
+    ('America', 'United States'),
+
+    ('United Kingdom', 'United Kingdom'),
+    ('UK', 'United Kingdom'),
+    ('Britain', 'United Kingdom'),
+
+    ('Malaysia', 'Malaysia'),
+    ('India', 'India'),
+
+    (NULL, 'Undefined');
  -- =======================================================================================
  -- Note:
  -- why Version ?: Inconsistent country and nulls found were found later on in the project
@@ -338,28 +367,38 @@ ORDER BY null_country_count DESC;
 -- ================================
 -- Create Table (stable)
 -- ================================
-CREATE OR REPLACE TABLE SILVER.SILVER_ACCOUNTS 
-AS 
-    SELECT 
-            ACCOUNT_ID,
-            CUSTOMER_ID,
-            ACCOUNT_NUMBER,
-            ACCOUNT_TYPE,
-            CURRENCY,
-            COUNTRY,
-    CASE
-             WHEN COUNTRY IS NOT NULL THEN COUNTRY
-             WHEN CURRENCY = 'PKR' THEN 'Pakistan'
-             WHEN CURRENCY = 'USD' THEN 'United States'
-             WHEN CURRENCY = 'GBP' THEN 'United Kingdom'
-             WHEN CURRENCY = 'EUR' THEN 'European Union'
-             WHEN CURRENCY = 'MYR' THEN 'Malaysia'
+CREATE OR REPLACE TABLE SILVER.SILVER_ACCOUNTS AS
+
+SELECT
+    SA.ACCOUNT_ID,
+    SA.CUSTOMER_ID,
+    SA.ACCOUNT_NUMBER,
+    SA.ACCOUNT_TYPE,
+    SA.CURRENCY,
+
+    -- Standardize existing country values.
+    -- If COUNTRY is null, derive it from the account currency.
+    COALESCE(
+        CC.CORRECT_VALUE,
+
+        CASE
+            WHEN SA.CURRENCY = 'PKR' THEN 'Pakistan'
+            WHEN SA.CURRENCY = 'USD' THEN 'United States'
+            WHEN SA.CURRENCY = 'GBP' THEN 'United Kingdom'
+            WHEN SA.CURRENCY = 'MYR' THEN 'Malaysia'
+            WHEN SA.CURRENCY = 'EUR' THEN 'Undefined'
             ELSE 'Undefined'
-    END AS standardized_country,
-            OPENING_DATE,
-            STATUS,
-            BALANCE
-    FROM SILVER.SILVER_ACCOUNTS_VERSION_1;
+        END
+    ) AS COUNTRY,
+
+    SA.OPENING_DATE,
+    SA.STATUS,
+    SA.BALANCE
+
+FROM SILVER.SILVER_ACCOUNTS_VERSION_1 AS SA
+
+LEFT JOIN SILVER.ACCOUNT_COUNTRY_LOOKUP AS CC
+    ON TRIM(SA.COUNTRY) = CC.INCORRECT_VALUE;
 -- --------------------------------------------
 -- Drop Version 1 table
 -- --------------------------------------------
