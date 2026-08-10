@@ -246,4 +246,11 @@ This allows the platform to gradually evolve from a synthetic batch-oriented ban
 
 ## License
 
+Copyright (c) 2026 Muhammad Adnan Khan. All rights reserved.
+
+This project is provided for educational and portfolio viewing purposes.
+See the `LICENSE` file for details.
+
+## License
+
 This project is intended for educational and portfolio purposes.
