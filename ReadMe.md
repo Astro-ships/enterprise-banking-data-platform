@@ -131,19 +131,25 @@ Therefore, the current Silver implementation should be viewed as the transformat
 
 The initial platform foundation has been implemented and is ready to serve as the baseline for subsequent development.
 
-### Version 1.1 — In Progress
+## Version 1.1 — In Progress
 
-The next development phase focuses on **automated ingestion using Snowpipe**.
+The next development phase focuses on moving the platform toward **automated and near-real-time ingestion using Snowpipe and Snowpipe Streaming**.
 
 Planned Version 1.1 work includes:
 
-* Configure Snowflake stages for automated file ingestion
-* Implement Snowpipe
-* Automatically load newly generated files into the Bronze layer
-* Test continuous ingestion
-* Validate ingestion history and failures
-* Update ingestion documentation
+* Configure Snowflake stages for ingestion
+* Implement Snowpipe for automated file-based ingestion
+* Implement Snowpipe Streaming for continuous event ingestion
+* Connect the banking transaction generator to the ingestion pipeline
+* Automatically load newly generated banking data into Snowflake
+* Test continuous and incremental ingestion
+* Validate ingestion history, monitoring, and failures
+* Update Bronze-layer ingestion processes
+* Evaluate how continuously arriving data affects Silver transformations
 * Preserve the existing Bronze → Silver → Data Vault architecture
+
+The goal of Version 1.1 is to move the platform from a primarily batch-oriented ingestion process toward a more **automated and near-real-time ingestion architecture**.
+
 
 Future versions may extend this further toward **Snowpipe Streaming and event-driven transaction ingestion**.
 
@@ -166,25 +172,19 @@ Future versions may extend this further toward **Snowpipe Streaming and event-dr
 
 ### Version 1.1 — Automated Ingestion
 
-* [ ] Configure Snowflake stages
-* [ ] Implement Snowpipe
-* [ ] Automate file-based ingestion
-* [ ] Test continuous ingestion
-* [ ] Monitor ingestion history and errors
-* [ ] Update ingestion documentation
+### Version 1.1 — Automated & Near-Real-Time Ingestion
 
-### Future Versions
+- [ ] Develop FastAPI transaction ingestion API
+- [ ] Connect transaction simulator to FastAPI
+- [ ] Implement Snowpipe for automated file ingestion
+- [ ] Implement Snowpipe Streaming for continuous event ingestion
+- [ ] Test file-based ingestion
+- [ ] Test direct event-based ingestion
+- [ ] Validate ingestion failures and monitoring
+- [ ] Adapt Bronze ingestion for incremental data
+- [ ] Evaluate Silver transformations with continuously arriving data
+- [ ] Update project documentation
 
-* [ ] Develop FastAPI REST API
-* [ ] Implement Snowpipe Streaming
-* [ ] Introduce event-driven transaction ingestion
-* [ ] Implement Snowflake Streams
-* [ ] Implement Dynamic Tables
-* [ ] Expand real-time processing capabilities
-* [ ] Develop Analytics Layer
-* [ ] Configure CI/CD Pipeline
-* [ ] Implement advanced data-quality monitoring
-* [ ] Continue improving the synthetic banking simulator
 
 ---
 
@@ -197,7 +197,7 @@ enterprise-banking-data-platform
 ├── api/
 ├── deployment/
 ├── docs/
-├── simulator/
+├── event_generator/
 ├── sql/
 │   ├── raw/
 │   ├── bronze/
