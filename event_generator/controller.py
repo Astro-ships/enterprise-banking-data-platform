@@ -61,6 +61,7 @@ def generate_merchants(total_merchants :int):
 # Generates banking transactions using existing accounts
 # and merchants.
 import random
+from event_generator.generators.transaction_amount_generator import generate_transaction_amount
 from event_generator.generators.transaction_generator import generate_transaction
 TRANSACTION_TYPES = [
     "PURCHASE",
@@ -82,6 +83,7 @@ def generate_transactions(accounts,merchants,total_transactions: int):
 
     for _ in range(total_transactions):
         transaction_type=random.choice(TRANSACTION_TYPES)
+        amount=generate_transaction_amount(transaction_type)
 
         # ==========================
         # PURCHASE

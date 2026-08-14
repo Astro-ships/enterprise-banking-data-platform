@@ -5,7 +5,7 @@
 from faker import Faker
 import random
 from datetime import datetime
-
+from event_generator.generators.transaction_amount_generator import generate_transaction_amount
 from event_generator.models.transaction import Transaction
 
 fake = Faker()
@@ -45,7 +45,7 @@ def generate_transaction(source_account_id: str,
         source_account_id=source_account_id,
         destination_account_id=destination_account_id,
         merchant_id=merchant_id,
-        amount=round(random.uniform(1, 100000),2),
+        amount=generate_transaction_amount(transaction_type),
         currency=currency,
         transaction_type=transaction_type,
         transaction_timestamp=datetime.now(),
