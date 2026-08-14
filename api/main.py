@@ -21,6 +21,6 @@ app = fapi(
 @app.post ("/transactions")
 def receive_transaction(transaction: TransactionRequest): 
     return{
-        "message": "Transaction recieved",
+        "message": "Transaction received",
         "transaction_id" : transaction.transaction_id
     }
