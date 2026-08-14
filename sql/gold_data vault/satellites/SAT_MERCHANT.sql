@@ -9,7 +9,6 @@ USE SCHEMA GOLD;
 -- ===========================================
 -- Create SAT_MERCHANT TABLE 
 -- ==========================================
-SHOW COLUMNS IN TABLE SILVER.SILVER_MERCHANTS;
 
 CREATE TABLE IF NOT EXISTS SAT_MERCHANT
 AS 
