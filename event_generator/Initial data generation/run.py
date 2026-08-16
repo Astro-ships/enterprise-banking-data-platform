@@ -45,14 +45,6 @@ def main():
     )
 
 
-    # ====================================
-    #  Testings 
-    # ===================================
-    print(f"Customers: {len(customers):,}")
-    print(f"Accounts: {len(accounts):,}")
-    print(f"Merchants: {len(merchants):,}")
-    print(f"Transactions: {len(transactions):,}")
-
     # ==========================================================
     # Export Collections to NDJSON
     # ==========================================================

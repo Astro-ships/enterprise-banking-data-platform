@@ -136,6 +136,7 @@ def generate_transactions(accounts,merchants,total_transactions: int):
                 merchant_id=None,
                 transaction_type=transaction_type,
                 currency=source_account.currency
-            )    
-        transactions.append(transaction)     
+            )   
+        transactions.append(transaction) 
+         
     return transactions
