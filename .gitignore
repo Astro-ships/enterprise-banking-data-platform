@@ -53,3 +53,6 @@ connections.toml
 
 *.db
 *.sqlite3
+
+# Ignored event generator files
+event_generator/ignore/
