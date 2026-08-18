@@ -24,5 +24,4 @@ def send_transaction(transaction):
             json=payload
         
       )
-      response.raise_for_status
-      return response.json()
+      return response
