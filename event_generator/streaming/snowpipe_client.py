@@ -1,5 +1,5 @@
 import os
-
+from dataclasses import asdict
 from dotenv import load_dotenv
 from snowflake.ingest.streaming import StreamingIngestClient
 
@@ -7,7 +7,7 @@ from snowflake.ingest.streaming import StreamingIngestClient
 load_dotenv()
 
 
-def main():
+def stream_transactions(transactions):
 
     # ---------------------------------------------------------
     # 1. Create Snowpipe Streaming client
@@ -33,7 +33,6 @@ def main():
 
     print("Streaming client created successfully")
 
-
     # ---------------------------------------------------------
     # 2. Open a streaming channel
     # ---------------------------------------------------------
@@ -45,47 +44,38 @@ def main():
     print("Channel:", status.channel_name)
     print("Initial status:", status.status_code)
 
-
     # ---------------------------------------------------------
-    # 3. Create ONE test transaction
-    # ---------------------------------------------------------
-
-    test_transaction = {
-        "PAYLOAD": {
-            "TRANSACTION_ID": "TXN_TEST_001",
-            "CUSTOMER_ID": "CUST-001",
-            "AMOUNT": 50000.00,
-            "TRANSACTION_TYPE": "TRANSFER",
-        }
-    }
-
-
-    # ---------------------------------------------------------
-    # 4. Append the row to the channel
+    # 3. Append transactions to the channel
     # ---------------------------------------------------------
 
-    print("Appending transaction...")
+    for transaction in transactions:
 
-    channel.append_row(
-        test_transaction,
-        "TXN_TEST_001"
-    )
+        print(
+            f"Appending transaction: "
+            f"{transaction.transaction_id}"
+        )
 
-    print("Transaction appended successfully")
+        channel.append_row(
+            {"PAYLOAD": asdict(transaction)},
+            transaction.transaction_id
+        )
 
+        print("=" * 100)
+        print("Transaction append successful")
+        print("=" * 100)
 
     # ---------------------------------------------------------
-    # 5. Flush the channel
+    # 4. Wait for Snowflake to flush the channel
     # ---------------------------------------------------------
 
     print("Waiting for Snowflake to flush the channel...")
 
     channel.wait_for_flush()
 
-    print("Channel flushed successfully")   
+    print("Channel flushed successfully")
 
     # ---------------------------------------------------------
-    # 6. Ask Snowflake what happened
+    # 5. Ask Snowflake what happened
     # ---------------------------------------------------------
 
     status = channel.get_channel_status()
@@ -96,17 +86,12 @@ def main():
     print("Status:", status.status_code)
     print("====================================")
 
-
     # ---------------------------------------------------------
-    # 7. Close cleanly
+    # 6. Close cleanly
     # ---------------------------------------------------------
 
     channel.close()
     client.close()
 
-
-    print("="*60)
+    print("=" * 100)
     print("ENDING SESSION")
-
-if __name__ == "__main__":
-    main()
