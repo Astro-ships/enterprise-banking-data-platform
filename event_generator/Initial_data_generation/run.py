@@ -6,7 +6,7 @@
 # It generates the banking entities in the correct order and
 # exports them as NDJSON files for Snowflake ingestion.
 import time 
-from event_generator.controller import (
+from event_generator.Initial_data_generation.controller import (
     generate_customers,
     generate_accounts,
     generate_merchants,
@@ -23,13 +23,18 @@ def main():
     # ==========================================================
     # Generate the core business entities required by the banking
     # platform before any transactions can occur.
+    print("="*80)
     print("Generating customers...")
+    print("="*80)
     customers = generate_customers(100000)
-
+    
     print("Generating accounts...")
     accounts = generate_accounts(customers)
+    print("="*80)
     print("Generating merchants...")
+    print("="*80)
     merchants = generate_merchants(10000)
+
 
 
     # ==========================================================
@@ -60,9 +65,9 @@ def main():
 
     write_ndjson("transactions.ndjson", transactions)
 
-    print("="*60)
+    print("="*100)
     print("Process Completed!")
-
+    print("="*100)
 
 # ==========================================================
 # Application Entry Point
