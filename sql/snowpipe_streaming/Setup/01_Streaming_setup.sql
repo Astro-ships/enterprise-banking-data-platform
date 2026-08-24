@@ -18,3 +18,9 @@ CREATE TABLE IF NOT EXISTS RAW_STREAMING.TRANSACTIONS (
 -- Verify Table Definition
 -- ==============================
 DESC TABLE BANKING.RAW_STREAMING.TRANSACTIONS;
+
+-- ========================================
+-- Create RSA_PUBLIC_KEY FOR AUTHENTICATION
+-- ========================================
+ALTER USER Astro 
+SET RSA_PUBLIC_KEY ='<paste your rsa key here after generating it through openssl>';
