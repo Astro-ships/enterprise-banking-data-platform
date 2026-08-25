@@ -42,7 +42,7 @@ STATUS
             BT.TRANSACTION_TYPE,
             TRANSACTION_TIMESTAMP,
     COALESCE(SL.CORRECT_VALUE,TRIM(BT.STATUS)) AS STATUS
-    FROM BRONZE.BRONZE_TRANSACTIONS AS BT
+    FROM BANKING.BRONZE.BRONZE_TRANSACTION_STREAM  AS BT
     
     LEFT JOIN SILVER.ACCOUNT_CURRENCY_LOOKUP AS CL
     ON 
@@ -82,5 +82,23 @@ SELECT GET_DDL(
     'TASK',
     'BANKING.SILVER.LOAD_SILVER_TRANSACTIONS'
 );
-DESC TABLE BANKING.SILVER.SILVER_TRANSACTIONS;
-SHOW COLUMN IN TABLE BRONZE.BRONZE_TRANSACTION;
+-- ==============================================================================
+-- Validate
+-- ==============================================================================
+SELECT 
+(SELECT COUNT(*) FROM BRONZE.BRONZE_TRANSACTIONS) AS BRONZE_COUNT,
+(SELECT COUNT(*) FROM SILVER.SILVER_TRANSACTIONS) AS SILVER_COUNT;
+-- ===============================================================================
+-- Check for quality the data thats being transformed
+-- ===============================================================================
+SELECT DISTINCT CURRENCY
+
+FROM SILVER.SILVER_TRANSACTIONS;
+SELECT DISTINCT STATUS FROM SILVER.SILVER_TRANSACTIONS;
+
+-- ===============================================================================
+-- Resume Task to automatically append rows
+-- ==============================================================================
+ALTER TASK SILVER.LOAD_SILVER_TRANSACTIONS
+RESUME;
+-- ===========================================================================
