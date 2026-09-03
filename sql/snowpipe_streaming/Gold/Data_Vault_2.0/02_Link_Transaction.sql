@@ -50,7 +50,7 @@ INNER JOIN BANKING.GOLD.HUB_TRANSACTION AS HT
 ON 
 ST.TRANSACTION_ID = HT.TRANSACTION_ID;
 -- ========================================================
--- Suspend Taks Iniitally
+-- Alter task to run imediately
 -- ========================================================
 ALTER TASK GOLD.LINK_TRANSACTION_TASK
-SUSPEND;
+RESUME;

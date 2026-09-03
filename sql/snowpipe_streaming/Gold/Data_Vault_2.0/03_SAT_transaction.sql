@@ -48,7 +48,7 @@ SELECT
     ON 
     ST.TRANSACTION_ID = HT.TRANSACTION_ID;
 -- ========================================================
--- Suspend Taks Iniitally
+-- Alter task to run imediately
 -- ========================================================
 ALTER TASK GOLD.SAT_TRANSACTION_TASK
-SUSPEND;
+RESUME;
