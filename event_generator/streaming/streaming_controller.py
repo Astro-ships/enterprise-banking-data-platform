@@ -85,7 +85,7 @@ def generate_transactions(accounts,merchants,total_transactions: int):
                 currency=source_account["currency"]
             )
         yield transaction
-        time.sleep(5)
+        time.sleep(0.3)
 # ==========================================
 # Test transaction payload
 # ==========================================
