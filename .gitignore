@@ -56,3 +56,9 @@ connections.toml
 
 # Ignored event generator files
 event_generator/ignore/
+
+#ignore base data 
+data/
+
+#ignore gitignore 
+.gitignore
