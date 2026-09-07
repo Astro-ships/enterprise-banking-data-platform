@@ -119,3 +119,15 @@ SELECT * FROM BANKING.GOLD.SUSPICIOUS_TRANSACTION_ALERT_LOG;
 --  to clear log history
 -- ================================================================
 TRUNCATE TABLE BANKING.GOLD.SUSPICIOUS_TRANSACTION_ALERT_LOG;
+
+--- =================================================
+-- Email Notifications Can also be implemented 
+-- ==================================================
+
+USE ROLE ACCOUNTADMIN;
+
+CREATE OR REPLACE NOTIFICATION INTEGRATION SUSPICIOUS_TRANSACTION_EMAIL
+    TYPE = EMAIL
+    ENABLED = TRUE
+    DEFAULT_RECIPIENTS = ('your_verified_email@example.com')
+    DEFAULT_SUBJECT = '🚨 Suspicious Banking Transaction Detected';
