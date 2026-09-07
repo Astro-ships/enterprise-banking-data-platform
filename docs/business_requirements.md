@@ -4,102 +4,523 @@
 
 ### Project Name
 
-Enterprise Banking Data Platform with Data Vault 2.0
+**Enterprise Banking Data Platform with Data Vault 2.0**
 
 ### Overview
 
-The Enterprise Banking Data Platform is a modern data engineering project that simulates how a financial institution ingests, processes, stores, and analyzes banking transactions.
+The Enterprise Banking Data Platform is a modern data engineering project that simulates how a financial institution can ingest, process, store, monitor, and analyze banking transaction data.
 
-The platform is designed using an event-driven architecture where every banking transaction is treated as a business event. These events are ingested through a REST API and processed using a hybrid architecture that combines batch processing for analytical workloads with near real-time processing for suspicious transactions.
+The platform uses a synthetic banking data generator to simulate upstream banking activity. Initial datasets are loaded through a batch-oriented workflow, while ongoing transaction events are ingested using the **Snowpipe Streaming SDK** for near-real-time processing.
 
-The project demonstrates modern data engineering concepts including Data Vault 2.0, Snowflake, event-driven ingestion, REST APIs, CI/CD, and analytical reporting.
+The platform uses **Snowflake** as the central data platform and implements a **Medallion Architecture** consisting of RAW, BRONZE, SILVER, and GOLD layers. The GOLD layer implements **Data Vault 2.0** to provide a scalable historical enterprise data model.
+
+The project demonstrates modern data engineering concepts including:
+
+* Data Vault 2.0
+* Snowflake
+* Synthetic data generation
+* Batch and streaming ingestion
+* Snowpipe Streaming
+* Snowflake Streams and Tasks
+* Data quality processing
+* Event-driven transaction generation
+* Snowflake Alerts
+* Notification integration
+* Git and GitHub
+* CI/CD using GitHub Actions
 
 ---
 
-## 2. Business Problem
+# 2. Business Problem
 
-Banks process millions of financial transactions every day from multiple channels including mobile banking, ATMs, online banking, point-of-sale terminals, and physical branches.
+Financial institutions process large volumes of transactions originating from multiple banking systems.
 
-Traditional reporting systems are often designed for scheduled analytical workloads and are not always suitable for responding quickly to suspicious activities such as potential fraud.
+These systems generate continuously changing data that must be captured, transformed, historically preserved, and made available for analytical and operational use.
 
-The organization requires a scalable platform capable of:
+A traditional batch-only architecture can introduce delays between transaction generation and downstream processing. This can become a limitation when operational events, such as high-value transactions, need to be detected quickly.
 
-* Ingesting banking transaction events.
-* Preserving complete historical records.
-* Supporting analytical reporting.
-* Identifying suspicious transactions for near real-time processing.
-* Providing a reliable foundation for future business intelligence solutions.
+The organization therefore requires a data platform capable of:
+
+* Ingesting large volumes of banking data.
+* Supporting both initial batch loading and ongoing transaction streaming.
+* Preserving historical business information.
+* Maintaining relationships between banking entities.
+* Applying data-quality controls.
+* Supporting analytical workloads.
+* Detecting suspicious high-value transactions.
+* Providing a foundation for future analytical and business-intelligence solutions.
 
 ---
 
-## 3. Business Objectives
+# 3. Business Objectives
 
 The platform shall:
 
-* Ingest transaction events through a REST API.
-* Simulate realistic banking activity using a transaction simulator.
-* Store historical data without losing business history.
-* Implement Data Vault 2.0 as the enterprise data model.
-* Support hybrid processing using both batch and near real-time workflows.
-* Produce analytical datasets for business reporting.
-* Demonstrate enterprise-grade CI/CD deployment practices.
+1. Simulate realistic banking entities and transaction activity.
+
+2. Perform an initial batch load of customers, accounts, merchants, and transactions.
+
+3. Support continuous transaction ingestion using Snowpipe Streaming.
+
+4. Store incoming data in a layered Medallion Architecture.
+
+5. Apply data validation and transformation in the Silver layer.
+
+6. Implement Data Vault 2.0 in the GOLD layer.
+
+7. Preserve historical business information.
+
+8. Process incremental data using Snowflake Streams and Tasks.
+
+9. Detect suspicious high-value transactions using Snowflake Alerts.
+
+10. Log detected suspicious transactions.
+
+11. Support notification of suspicious transaction events.
+
+12. Demonstrate automated software delivery using GitHub Actions.
 
 ---
 
-## 4. Project Scope
+# 4. Project Scope
 
-### In Scope
+## In Scope
 
-* Banking transaction simulation.
-* REST API ingestion.
-* Snowflake data platform.
-* RAW, Bronze, Silver, and Gold layers.
-* Data Vault 2.0 implementation.
-* Batch processing.
-* Near real-time processing for suspicious transactions.
-* Data quality validation.
-* Alerts and notifications.
-* Analytics and reporting.
+The project includes:
+
+* Synthetic banking data generation.
+* Customer generation.
+* Account generation.
+* Merchant generation.
+* Transaction generation.
+* Initial batch data loading.
+* Continuous transaction streaming.
+* Snowflake data storage.
+* RAW layer.
+* BRONZE layer.
+* SILVER layer.
+* GOLD layer.
+* Data Vault 2.0.
+* Hubs.
+* Links.
+* Satellites.
+* Data-quality processing.
+* Snowflake Streams.
+* Snowflake Tasks.
+* Task dependency graphs.
+* Snowflake Alerts.
+* Suspicious transaction logging.
+* Notification integration.
+* Git/GitHub version control.
 * GitHub Actions CI/CD.
+* Analytical data preparation.
 
-### Out of Scope
+---
+
+## Out of Scope
+
+The platform does not attempt to implement a complete banking application.
+
+The following are outside the project scope:
 
 * Customer authentication.
 * Online banking user interface.
-* Core banking operations.
+* Core banking system functionality.
 * Payment authorization.
-* Account balance calculations.
-* Machine learning fraud detection.
+* Payment settlement.
+* Real banking account management.
+* Real-world payment processing.
+* Production banking security controls.
+* Machine-learning-based fraud detection.
+* Regulatory compliance implementation.
+* Real customer data.
 
 ---
 
-## 5. Primary Business Event
+# 5. Primary Business Event
 
-The primary business event for this platform is:
+The primary business event represented by the platform is:
 
 **Transaction Occurred**
 
-A transaction event represents a completed or attempted financial operation performed within the banking system, including deposits, withdrawals, transfers, card payments, and loan payments.
+A transaction event represents a financial operation generated by the simulated banking environment.
+
+The current simulator supports transaction types including:
+
+* `PURCHASE`
+* `TRANSFER`
+* `ATM_WITHDRAWAL`
+
+Each transaction event contains information such as:
+
+* Transaction identifier.
+* Source account.
+* Destination account.
+* Merchant.
+* Transaction amount.
+* Currency.
+* Transaction type.
+* Transaction timestamp.
+* Transaction status.
+
+The event is treated as an immutable business event after ingestion.
 
 ---
 
-## 6. Success Criteria
+# 6. Initial Data Requirements
 
-The project will be considered successful when it can:
+The platform must support the generation and loading of an initial banking dataset.
 
-* Generate realistic banking transactions.
-* Ingest transaction events successfully.
-* Preserve historical business data.
-* Process normal transactions in batch.
-* Process suspicious transactions with low latency.
-* Produce business-ready analytical outputs.
-* Demonstrate an end-to-end automated deployment pipeline.
+The current initial dataset is approximately:
+
+| Entity       | Approximate Volume |
+| ------------ | -----------------: |
+| Customers    |            100,000 |
+| Accounts     |            100,000 |
+| Merchants    |             10,000 |
+| Transactions |          1,000,000 |
+
+The initial dataset establishes the historical foundation against which subsequent streaming events are processed.
+
+The initial load follows:
+
+```text id="6v3t1p"
+Synthetic Data Generator
+        │
+        ▼
+       RAW
+        │
+        ▼
+     BRONZE
+        │
+        ▼
+      SILVER
+        │
+        ▼
+   DATA VAULT GOLD
+```
 
 ---
 
-## 7. Assumptions
+# 7. Streaming Requirements
 
-* The banking simulator represents upstream banking systems.
-* Every transaction is treated as an immutable business event.
-* Historical business data must never be overwritten.
-* The platform is designed for learning enterprise data engineering concepts rather than implementing a complete banking system.
+After the initial dataset has been loaded, the platform must support continuous transaction generation and ingestion.
+
+The streaming workflow is:
+
+```text id="8m5k2q"
+Transaction Simulator
+        │
+        ▼
+Snowpipe Streaming SDK
+        │
+        ▼
+       RAW
+        │
+        ▼
+     BRONZE
+        │
+        ▼
+      SILVER
+        │
+        ▼
+   Data Vault GOLD
+```
+
+The streaming layer is responsible for continuously delivering newly generated transaction events into Snowflake.
+
+The platform uses Snowpipe Streaming rather than relying on the previously considered REST/FastAPI ingestion path.
+
+---
+
+# 8. Data Processing Requirements
+
+The platform must progressively transform data through the Medallion Architecture.
+
+### RAW
+
+The RAW layer captures incoming source data with minimal transformation.
+
+### BRONZE
+
+The BRONZE layer provides a structured representation of the ingested data.
+
+### SILVER
+
+The SILVER layer performs activities such as:
+
+* Validation.
+* Standardization.
+* Data-quality processing.
+* Deduplication where applicable.
+* Preparation of records for downstream modeling.
+
+### GOLD
+
+The GOLD layer implements the Data Vault 2.0 enterprise historical model.
+
+```text id="4t6c2v"
+SILVER
+   │
+   ▼
+┌──────────────┐
+│     HUBS     │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│    LINKS     │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│  SATELLITES  │
+└──────────────┘
+```
+
+---
+
+# 9. Historical Data Requirements
+
+The platform must preserve historical business information.
+
+Business entities are represented using Data Vault Hubs, while descriptive and historical attributes are maintained through Satellites.
+
+Historical information must not be unnecessarily overwritten.
+
+The model should therefore support:
+
+* Stable business keys.
+* Deterministic hash keys.
+* Historical Satellite records.
+* Incremental loading.
+* Traceability to source data.
+
+---
+
+# 10. Incremental Processing Requirements
+
+The platform must process newly arriving data incrementally rather than rebuilding the complete dataset after every ingestion cycle.
+
+Snowflake Streams are used to identify newly available data.
+
+Snowflake Tasks process these changes through the transformation pipeline.
+
+The Data Vault transaction-loading dependency graph follows:
+
+```text id="p4n8r2"
+HUB_TRANSACTION
+      │
+      ▼
+LINK_ACCOUNT_TRANSACTION
+      │
+      ▼
+SAT_TRANSACTION
+```
+
+This provides an ordered processing flow for transaction-related Data Vault objects.
+
+---
+
+# 11. Data Quality Requirements
+
+The platform must demonstrate how a data platform can handle imperfect upstream data.
+
+The simulator may intentionally generate scenarios such as:
+
+* Duplicate events.
+* Missing optional values.
+* Invalid or unexpected values.
+* Non-standard values.
+* Late-arriving events.
+* Out-of-order events.
+
+Data-quality processing is primarily performed in the Silver layer before records are loaded into the Data Vault.
+
+---
+
+# 12. Suspicious Transaction Monitoring
+
+The platform must demonstrate operational monitoring of high-value transactions.
+
+Approximately **3% of generated transactions** may be deliberately generated as suspicious high-value transactions.
+
+The current alert threshold is:
+
+```text id="v7x3k1"
+AMOUNT >= 100000
+```
+
+The monitoring workflow is:
+
+```text id="0m5n7r"
+Transaction
+     │
+     ▼
+   SILVER
+     │
+     ▼
+SAT_TRANSACTION
+     │
+     ▼
+Snowflake Alert
+     │
+     ├──────────────► Suspicious Transaction Log
+     │
+     └──────────────► Notification
+```
+
+This demonstrates the ability of the platform to connect data engineering pipelines with operational monitoring.
+
+---
+
+# 13. Notification Requirements
+
+When a suspicious transaction condition is detected, the platform should support sending a notification to a configured recipient.
+
+The notification mechanism is implemented using Snowflake notification capabilities.
+
+The notification should provide enough information to identify that a suspicious transaction has been detected without requiring manual inspection of the entire transaction dataset.
+
+---
+
+# 14. CI/CD Requirements
+
+The project must demonstrate basic enterprise software-development practices.
+
+The platform uses Git and GitHub for source-code management.
+
+GitHub Actions is used to demonstrate automated CI/CD workflows.
+
+The repository should maintain:
+
+* Version-controlled source code.
+* SQL scripts.
+* Python code.
+* Configuration files.
+* Documentation.
+* Automated workflow definitions.
+
+Sensitive credentials and private authentication keys must not be committed to the repository.
+
+---
+
+# 15. Security Requirements
+
+Although this is a learning and portfolio project rather than a production banking system, the platform must demonstrate basic secure-development practices.
+
+Sensitive configuration should be externalized from source code.
+
+Examples include:
+
+* Snowflake credentials.
+* Environment variables.
+* RSA private keys.
+* Notification configuration.
+
+The simulator and streaming components must not expose private credentials in source control.
+
+---
+
+# 16. Success Criteria
+
+The project will be considered successful when it can demonstrate an end-to-end banking data pipeline capable of:
+
+* Generating realistic synthetic banking data.
+* Loading a large initial dataset.
+* Ingesting continuous transaction events.
+* Successfully streaming transaction data into Snowflake.
+* Processing data through RAW, BRONZE, SILVER, and GOLD.
+* Implementing a Data Vault 2.0 model.
+* Preserving historical business information.
+* Processing incremental changes using Streams and Tasks.
+* Executing dependent Data Vault loading tasks in the correct order.
+* Detecting suspicious high-value transactions.
+* Logging suspicious transactions.
+* Sending notifications for detected events.
+* Supporting analytical workloads.
+* Maintaining the project through Git and GitHub.
+* Demonstrating CI/CD using GitHub Actions.
+
+---
+
+# 17. Assumptions
+
+The project operates under the following assumptions:
+
+* The synthetic banking simulator represents upstream banking systems.
+* Generated data is synthetic and does not represent real customers.
+* Transactions are treated as immutable business events.
+* Data Vault Hubs use stable business keys.
+* Historical information is preserved through Data Vault Satellites.
+* Data quality and standardization occur primarily in the Silver layer.
+* Snowflake provides the central data platform.
+* Snowpipe Streaming provides the ongoing transaction ingestion mechanism.
+* Snowflake Streams and Tasks provide incremental downstream processing.
+* Suspicious transaction detection is rule-based rather than machine-learning-based.
+* The platform is intended to demonstrate enterprise data-engineering concepts rather than implement a complete production banking system.
+
+---
+
+# 18. High-Level Business Architecture
+
+The completed platform can be summarized as:
+
+```text id="m3x8q2"
+                  Synthetic Banking Environment
+                           │
+             ┌─────────────┴──────────────┐
+             │                            │
+        Initial Load                  Live Events
+             │                            │
+             ▼                            ▼
+            RAW                  Snowpipe Streaming
+             │                            │
+             └─────────────┬──────────────┘
+                           ▼
+                         BRONZE
+                           │
+                           ▼
+                         SILVER
+                           │
+                    ┌──────┴──────┐
+                    │             │
+                    ▼             ▼
+              Data Vault      Data Quality
+                 GOLD
+                    │
+                    ▼
+             ┌───────────────┐
+             │   Analytics   │
+             └───────────────┘
+                    │
+                    ▼
+             Suspicious Transaction
+                  Monitoring
+                    │
+             ┌──────┴──────┐
+             ▼             ▼
+          Alert Log    Notification
+```
+
+---
+
+# 19. Business Requirement Summary
+
+The Enterprise Banking Data Platform is designed to provide a scalable and extensible foundation for banking data processing.
+
+Its primary requirements are:
+
+1. **Generate** realistic synthetic banking activity.
+2. **Ingest** large initial datasets through batch processing.
+3. **Stream** ongoing transaction events into Snowflake.
+4. **Transform** data through the Medallion Architecture.
+5. **Model** business entities using Data Vault 2.0.
+6. **Preserve** historical business information.
+7. **Process** new data incrementally.
+8. **Monitor** suspicious high-value transactions.
+9. **Notify** configured recipients of detected events.
+10. **Support** downstream analytics.
+11. **Demonstrate** version control and CI/CD practices.
+
+The resulting architecture demonstrates how a modern data platform can combine **batch ingestion, streaming ingestion, data quality, historical modeling, incremental processing, analytics, and operational monitoring** within a single Snowflake-based banking environment.

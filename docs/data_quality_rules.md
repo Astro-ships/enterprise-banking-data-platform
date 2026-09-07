@@ -1,300 +1,299 @@
-
 # Enterprise Banking Data Platform
 
 # Data Quality Rules Documentation
 
 ## 1. Overview
 
-This document defines the data quality rules and validation standards for the Enterprise Banking Data Platform.
+This document defines the data-quality rules and validation approach used by the **Enterprise Banking Data Platform**.
 
-The event generator intentionally produces imperfect banking data to simulate real-world source systems. In real enterprise environments, data received from operational systems often contains missing values, inconsistent formats, duplicate records, invalid values, and relationship issues.
+The Banking Simulator intentionally generates imperfect source data to simulate the types of issues commonly encountered in operational banking systems.
 
-The purpose of the data quality process is to identify, validate, and correct these issues before the data reaches analytical and reporting layers.
+These imperfections provide realistic scenarios for testing:
 
-The quality process follows the platform architecture:
+* Data profiling
+* Data validation
+* Standardization
+* Null handling
+* Duplicate handling
+* Referential-integrity validation
+* Business-rule validation
+* Incremental data processing
 
+The platform follows a layered approach in which the source data is preserved before quality rules are progressively applied.
+
+```text
+Banking Simulator
+       │
+       ▼
+     RAW
+       │
+       ▼
+    BRONZE
+       │
+       ▼
+    SILVER
+       │
+       ▼
+ Data Vault 2.0
+     GOLD
+       │
+       ▼
+   Analytics
 ```
 
-Source Systems
-|
-|
-Event Generator
-(Messy Banking Data)
-|
-|
-Bronze Layer
-(Raw Data Storage)
-|
-|
-Silver Layer
-(Data Cleaning & Validation)
-|
-|
-Data Vault 2.0
-(Historical Enterprise Model)
-|
-|
-Gold Layer
-(Analytics & Reporting)
+The **RAW layer preserves the source representation**, while the **Bronze and Silver layers progressively structure, validate, cleanse, and standardize the data**.
 
-````
+The Data Vault then provides the historical enterprise model.
 
 ---
 
 # 2. Data Quality Dimensions
 
-The platform evaluates data quality using the following dimensions.
-
----
+The platform considers several core data-quality dimensions.
 
 ## 2.1 Completeness
 
-### Definition
+Ensures that required fields contain values.
 
-Ensures required fields contain values and are not missing.
-
-### Example Problem
+Example:
 
 ```json
 {
-    "account_number": null
+    "account_id": null
 }
-````
+```
 
-### Expected Behavior
+A missing business identifier can prevent the record from being correctly related to other entities.
 
-Required business fields should always contain valid values.
+Required fields are therefore validated before records are promoted to trusted downstream layers.
 
 ---
 
 ## 2.2 Validity
 
-### Definition
+Ensures that values conform to defined business rules and accepted formats.
 
-Ensures data values follow predefined business rules and accepted formats.
+Example:
 
-### Example Problem
-
-Invalid account status:
-
-```
+```text
 ACT
 ```
 
-Expected:
+may be standardized to:
 
-```
+```text
 ACTIVE
 ```
+
+The same principle applies to transaction types, currencies, statuses, and other controlled values.
 
 ---
 
 ## 2.3 Consistency
 
-### Definition
+Ensures that equivalent values are represented consistently.
 
-Ensures the same data is represented in the same format across the platform.
+For example:
 
-### Example Problem
-
-The same currency represented differently:
-
-```
+```text
 PKR
 pkr
 Pakistani Rupee
 ```
 
-Expected:
+should ultimately be represented consistently as:
 
-```
+```text
 PKR
 ```
+
+This prevents logically identical values from being treated as separate categories during analytics.
 
 ---
 
 ## 2.4 Accuracy
 
-### Definition
+Ensures that data is logically appropriate for its business context.
 
-Ensures data represents the correct business meaning.
+For example, relationships between:
 
-### Example Problem
-
-A Pakistani customer account:
-
-```
-Country: Pakistan
-Currency: USD
+```text
+Customer → Account → Transaction
 ```
 
-may require validation.
+must be valid.
+
+Accuracy checks therefore include business-rule and relationship validation rather than only checking data types.
 
 ---
 
 ## 2.5 Uniqueness
 
-### Definition
+Ensures that records that should be unique are not duplicated.
 
-Ensures duplicate records are identified and controlled.
+Examples include:
 
-### Example:
+* Customer identifiers
+* Account identifiers
+* Account numbers
+* Merchant identifiers
+* Transaction identifiers
 
-Duplicate customers:
-
-```
-Customer ID: 101
-Email: ali@test.com
-```
-
-and
-
-```
-Customer ID: 202
-Email: ali@test.com
-```
+Duplicate detection is particularly important for streaming ingestion because the same event may potentially be received more than once.
 
 ---
 
 ## 2.6 Referential Integrity
 
-### Definition
+Ensures that relationships between banking entities are valid.
 
-Ensures relationships between entities are maintained.
+For example:
 
-### Example:
-
-A transaction references an account that does not exist.
-
-Invalid:
-
-```
+```text
 Transaction
-     |
-     X
+     │
+     ▼
+Source Account
+```
+
+The referenced account should exist in the account dataset.
+
+Similarly:
+
+```text
 Account
+   │
+   ▼
+Customer
 ```
 
----
-
-# 3. Customer Data Quality Rules
-
-## 3.1 Required Fields
-
-The following fields are mandatory:
-
-| Column       | Rule               |
-| ------------ | ------------------ |
-| customer_id  | Must not be NULL   |
-| first_name   | Must not be NULL   |
-| last_name    | Must not be NULL   |
-| email        | Must not be NULL   |
-| phone_number | Should not be NULL |
+An account should reference an existing customer.
 
 ---
 
-## 3.2 Email Validation
+# 3. Source Data Quality Strategy
 
-Customer emails must follow a valid email format.
+The Banking Simulator intentionally creates source data that is not assumed to be perfect.
 
+The purpose is to allow the platform to demonstrate how downstream Data Engineering processes deal with imperfect operational data.
+
+Potential source-data issues include:
+
+* Missing values
+* Duplicate records
+* Inconsistent representations
+* Invalid relationships
+* Invalid business values
+* Transaction anomalies
+* High-value transactions
+
+The important principle is:
+
+> **Do not assume source data is clean. Profile and validate it before trusting it.**
+
+---
+
+# 4. Customer Data Quality Rules
+
+## 4.1 Required Fields
+
+Customer records should contain the required business attributes.
+
+| Field          | Rule                              |
+| -------------- | --------------------------------- |
+| `customer_id`  | Must not be NULL                  |
+| `first_name`   | Should not be NULL                |
+| `last_name`    | Should not be NULL                |
+| `email`        | Should not be NULL                |
+| `phone_number` | Should not be NULL where required |
+
+The customer identifier is particularly important because it is used to establish relationships with accounts.
+
+---
+
+## 4.2 Customer Identifier
+
+`customer_id` must uniquely identify a customer.
+
+Rules:
+
+* Must not be NULL.
+* Must be unique.
+* Must maintain a consistent format.
+* Must remain stable across downstream processing.
+
+---
+
+## 4.3 Email Validation
+
+Where email data is available, it should follow a valid email structure.
+
+Example:
+
+```text
 Valid:
-
-```
 customer@gmail.com
-```
 
 Invalid:
-
-```
 customer@
 gmail
 ```
 
 ---
 
-## 3.3 Duplicate Customer Detection
+## 4.4 Customer Name Standardization
 
-Potential duplicates should be identified using business keys.
+Equivalent representations should be standardized.
 
-Possible duplicate identifiers:
+Source examples:
 
-* email
-* phone number
-* national identity number
-
-Example SQL logic:
-
-```sql
-ROW_NUMBER()
-OVER(
-PARTITION BY email
-ORDER BY created_timestamp
-)
-```
-
----
-
-## 3.4 Customer Name Standardization
-
-Problem:
-
-```
+```text
 ALI KHAN
 Ali Khan
 ali khan
 ```
 
-Expected:
+Expected standardized representation:
 
-```
+```text
 Ali Khan
 ```
 
 ---
 
-# 4. Account Data Quality Rules
+# 5. Account Data Quality Rules
 
-## 4.1 Required Fields
+## 5.1 Required Fields
 
-Mandatory fields:
-
-| Column         | Rule               |
-| -------------- | ------------------ |
-| account_id     | Must not be NULL   |
-| customer_id    | Must not be NULL   |
-| account_number | Should not be NULL |
-| account_type   | Should not be NULL |
-| currency       | Must not be NULL   |
-| opening_date   | Must not be NULL   |
-| status         | Must not be NULL   |
+| Field            | Rule               |
+| ---------------- | ------------------ |
+| `account_id`     | Must not be NULL   |
+| `customer_id`    | Must not be NULL   |
+| `account_number` | Must not be NULL   |
+| `account_type`   | Must not be NULL   |
+| `currency`       | Must not be NULL   |
+| `opening_date`   | Should not be NULL |
+| `status`         | Must not be NULL   |
 
 ---
 
-## 4.2 Account Number Validation
+## 5.2 Account Uniqueness
 
-Every account must have a unique account number.
-
-Invalid:
-
-```json
-{
-"account_number": null
-}
-```
+Each account should have a unique identifier and account number.
 
 Rules:
 
-* Account number cannot be NULL.
-* Account number must be unique.
-* Account number format must follow banking standards.
+* `account_id` must be unique.
+* `account_number` must be unique.
+* Account identifiers must not be NULL.
 
 ---
 
-## 4.3 Account Type Standardization
+## 5.3 Account Type Standardization
 
-Accepted account types:
+The platform recognizes configured account types such as:
 
-```
+```text
 SAVINGS
 CURRENT
 BUSINESS
@@ -302,33 +301,40 @@ LOAN
 CREDIT
 ```
 
-Invalid examples:
+Source variations should be standardized.
 
-```
+Examples:
+
+```text
 saving
 saving account
 sav
-unknown
 ```
+
+should map to the appropriate standardized account type where a valid mapping exists.
+
+Unknown or unmappable values should be handled according to the configured Silver-layer quality strategy.
 
 ---
 
-## 4.4 Account Status Standardization
+## 5.4 Account Status Standardization
 
-Source values may contain:
+Source systems may provide inconsistent status representations.
 
-```
+Examples:
+
+```text
 ACT
 Active
 active
-Dormant
 DORM
+Dormant
 closed
 ```
 
-Standardized values:
+These should be standardized to controlled values such as:
 
-```
+```text
 ACTIVE
 DORMANT
 CLOSED
@@ -337,116 +343,146 @@ FROZEN
 
 ---
 
-## 4.5 Currency Validation
+## 5.5 Currency Standardization
 
-Currency must follow ISO currency codes.
+Currency values must use consistent currency codes.
 
-Accepted:
+Examples:
 
-```
+```text
 PKR
 USD
 EUR
 GBP
 ```
 
-Invalid:
+Source variations such as:
 
-```
+```text
+pkr
 Pakistani Rupee
 Dollar
 US Dollars
-pkr
 ```
+
+should be mapped to the appropriate standardized currency code where possible.
 
 ---
 
-## 4.6 Customer Relationship Validation
+## 5.6 Customer Relationship Validation
 
-Every account must belong to an existing customer.
+Every account should reference an existing customer.
 
-Rule:
+Conceptually:
 
-```
+```text
 account.customer_id
-must exist in
+        │
+        ▼
 customer.customer_id
 ```
 
----
+If the customer does not exist, the relationship is considered invalid.
 
-# 5. Merchant Data Quality Rules
-
-## 5.1 Required Fields
-
-Mandatory fields:
-
-| Column            | Rule               |
-| ----------------- | ------------------ |
-| merchant_id       | Must not be NULL   |
-| merchant_name     | Must not be NULL   |
-| merchant_category | Should not be NULL |
+This validation is important because the Data Vault ultimately relies on valid business relationships.
 
 ---
 
-## 5.2 Merchant Name Standardization
+# 6. Merchant Data Quality Rules
 
-Source examples:
+## 6.1 Required Fields
 
-```
+| Field               | Rule               |
+| ------------------- | ------------------ |
+| `merchant_id`       | Must not be NULL   |
+| `merchant_name`     | Must not be NULL   |
+| `merchant_category` | Should not be NULL |
+
+---
+
+## 6.2 Merchant Identifier
+
+`merchant_id` must uniquely identify a merchant.
+
+Rules:
+
+* Must not be NULL.
+* Must be unique.
+* Must maintain a consistent format.
+
+---
+
+## 6.3 Merchant Name Standardization
+
+Equivalent merchant representations should be standardized.
+
+Examples:
+
+```text
 Amazon
 amazon
 AMAZON.COM
 Amazon Inc
 ```
 
-Expected:
-
-```
-Amazon
-```
-
+should be mapped to a consistent representation where the appropriate business mapping exists.
 
 ---
 
-## 5.3 Duplicate Merchant Detection
+## 6.4 Duplicate Merchant Detection
 
-Potential duplicates identified by:
+Potential duplicates can be identified using available business attributes such as:
 
-* merchant name
-* merchant website
-* merchant identifier
+* Merchant identifier
+* Merchant name
+* Merchant website
 
----
-
-# 6. Transaction Data Quality Rules
-
-## 6.1 Required Fields
-
-Mandatory fields:
-
-| Column                | Rule             |
-| --------------------- | ---------------- |
-| transaction_id        | Must not be NULL |
-| source_account_id     | Must not be NULL |
-| amount                | Must not be NULL |
-| currency              | Must not be NULL |
-| transaction_timestamp | Must not be NULL |
-| transaction_type      | Must not be NULL |
+The final rule depends on which attributes are available in the source data.
 
 ---
 
-## 6.2 Transaction Amount Validation
+# 7. Transaction Data Quality Rules
+
+Transactions are particularly important because they form the primary event stream of the platform.
+
+## 7.1 Required Fields
+
+| Field                   | Rule             |
+| ----------------------- | ---------------- |
+| `transaction_id`        | Must not be NULL |
+| `source_account_id`     | Must not be NULL |
+| `amount`                | Must not be NULL |
+| `currency`              | Must not be NULL |
+| `transaction_timestamp` | Must not be NULL |
+| `transaction_type`      | Must not be NULL |
+| `status`                | Must not be NULL |
+
+---
+
+## 7.2 Transaction Identifier
+
+`transaction_id` must uniquely identify a transaction event.
 
 Rules:
 
-```
+* Must not be NULL.
+* Should be unique.
+* Must remain stable throughout the pipeline.
+* Is used for downstream traceability and Data Vault modeling.
+
+---
+
+## 7.3 Transaction Amount Validation
+
+Normal transactions must have a positive monetary amount.
+
+```text
 amount > 0
 ```
 
-Invalid:
+Invalid examples:
 
-```
+```text
 -1000
 0
 NULL
@@ -454,174 +490,497 @@ NULL
 
 ---
 
-## 6.3 Transaction Type Validation
+## 7.4 Transaction Type Validation
 
-Accepted values:
+The current simulator supports transaction types including:
 
-```
+```text
 PURCHASE
 TRANSFER
 ATM_WITHDRAWAL
 ```
 
+Only configured transaction types should be accepted by downstream transformations.
+
 ---
 
-## 6.4 Transfer Validation
+## 7.5 Transfer Validation
 
-For transfer transactions:
+Transfers require both a source and destination account.
 
-Rule:
+The source and destination should not be the same account.
 
-```
+```text
 source_account_id != destination_account_id
 ```
 
 Invalid:
 
-```
-Account A → Account A
+```text
+Account A
+   │
+   └──────► Account A
 ```
 
 ---
 
-## 6.5 Transaction Account Validation
+## 7.6 Transaction Account Validation
 
-Every transaction account reference must exist.
+Transaction account references must correspond to existing accounts.
 
-Rule:
+For example:
 
-```
+```text
 transaction.source_account_id
-exists in
-account.account_id
+              │
+              ▼
+       account.account_id
 ```
+
+An unknown account reference represents a referential-integrity failure.
 
 ---
 
-## 6.6 Closed Account Transaction Validation
+## 7.7 Merchant Relationship Validation
 
-A closed account should not generate transactions.
+Transactions involving merchants should reference a valid merchant.
 
-Invalid scenario:
-
+```text
+Transaction
+     │
+     ▼
+merchant_id
+     │
+     ▼
+Merchant
 ```
-Account Status:
+
+This prevents transactions from referencing merchants that do not exist in the simulated environment.
+
+---
+
+## 7.8 Closed Account Validation
+
+Transactions should not normally originate from accounts whose status is:
+
+```text
 CLOSED
-
-Transaction:
-PURCHASE
 ```
+
+Example invalid scenario:
+
+```text
+Account Status
+      │
+      ▼
+    CLOSED
+
+      +
+
+Transaction
+      │
+      ▼
+   PURCHASE
+```
+
+Such records should be identified by the transaction validation process.
 
 ---
 
-# 7. Data Quality Handling Strategy
+# 8. Duplicate Handling
 
-## Bronze Layer
+Duplicate records can occur in both batch and streaming environments.
 
-Purpose:
+The platform therefore considers transaction uniqueness when processing incoming data.
 
-* Store raw source data.
-* Preserve original records.
-* No transformations.
-* Maintain audit history.
+A typical deduplication strategy is based on the business identifier:
 
-Example:
-
-```
-raw_accounts
-raw_transactions
-raw_customers
+```text
+transaction_id
 ```
 
----
-
-# Silver Layer
-
-Purpose:
-
-* Apply data quality rules.
-* Standardize values.
-* Remove duplicates.
-* Handle missing values.
-* Validate relationships.
-
-Examples:
-
-## Null Handling
-
-```sql
-COALESCE(account_type,'UNKNOWN')
-```
-
----
-
-## Standardizing Status
-
-```sql
-CASE
-WHEN status IN ('ACT','Active','active')
-THEN 'ACTIVE'
-END
-```
-
----
-
-## Duplicate Removal
+For example:
 
 ```sql
 QUALIFY ROW_NUMBER()
-OVER(
-PARTITION BY account_number
-ORDER BY load_timestamp DESC
-)=1
+OVER (
+    PARTITION BY transaction_id
+    ORDER BY load_timestamp DESC
+) = 1
+```
+
+This retains the selected record while eliminating duplicate representations of the same transaction event.
+
+The exact deduplication strategy may vary depending on the source and ingestion mechanism.
+
+---
+
+# 9. Null Handling
+
+NULL handling is performed primarily during the transformation process.
+
+The appropriate strategy depends on the field.
+
+For example, a controlled categorical field may use:
+
+```sql
+COALESCE(account_type, 'UNKNOWN')
+```
+
+However, business identifiers should generally **not** be replaced with arbitrary placeholder values because doing so can create false relationships.
+
+For example:
+
+```text
+customer_id
+account_id
+transaction_id
+```
+
+require stricter validation.
+
+---
+
+# 10. Standardization
+
+The Silver layer is responsible for transforming inconsistent source representations into standardized values.
+
+Examples include:
+
+```text
+Source                  Silver
+------                  ------
+pkr              →      PKR
+usd              →      USD
+Active           →      ACTIVE
+ACT              →      ACTIVE
+```
+
+Standardization allows downstream Data Vault and analytical processes to operate on consistent values.
+
+---
+
+# 11. Bronze Layer Quality Strategy
+
+The Bronze layer primarily provides a structured representation of the incoming source data.
+
+Its responsibilities include:
+
+* Parsing incoming records.
+* Extracting source attributes.
+* Applying appropriate data types.
+* Preserving source information.
+* Preparing data for Silver-layer processing.
+
+The Bronze layer should not attempt to hide the original source-data problems.
+
+Conceptually:
+
+```text
+RAW
+ │
+ ▼
+BRONZE
+ │
+ │ Structured source representation
+ ▼
+SILVER
 ```
 
 ---
 
-# Gold Layer
+# 12. Silver Layer Quality Strategy
 
-Purpose:
+The Silver layer is the primary data-quality and transformation layer.
 
-Create business-ready datasets for:
+Its responsibilities include:
 
-* Reporting
-* Dashboards
-* Analytics
-* Machine Learning
+* Applying validation rules.
+* Standardizing values.
+* Handling NULL values.
+* Identifying duplicates.
+* Validating relationships.
+* Applying business rules.
+* Preparing trusted records for downstream modeling.
 
-Examples:
+The resulting data is suitable for loading into the Data Vault.
 
-```
-Customer Analytics
-Transaction Analytics
-Revenue Analysis
-Fraud Detection Features
+```text
+BRONZE
+   │
+   ▼
+Validation
+   │
+   ▼
+Standardization
+   │
+   ▼
+Deduplication
+   │
+   ▼
+Relationship Validation
+   │
+   ▼
+SILVER
 ```
 
 ---
 
-# 8. Data Quality Monitoring
+# 13. Data Vault Quality Considerations
 
-The platform should track:
+The Data Vault 2.0 layer depends on reliable business keys and relationships.
 
-* Number of rejected records
-* Number of duplicate records
-* Missing field counts
-* Invalid value counts
-* Referential integrity failures
+The Silver layer therefore needs to provide sufficiently validated records before they enter the Data Vault.
+
+The relationship is:
+
+```text
+SILVER
+   │
+   ├── Valid Business Keys
+   │
+   ├── Valid Relationships
+   │
+   └── Standardized Attributes
+            │
+            ▼
+      DATA VAULT 2.0
+```
+
+The Data Vault then separates the information into:
+
+```text
+HUBS
+LINKS
+SATELLITES
+```
+
+For example:
+
+```text
+Transaction
+    │
+    ├──────────────► HUB_TRANSACTION
+    │
+    ├──────────────► LINK_ACCOUNT_TRANSACTION
+    │
+    └──────────────► SAT_TRANSACTION
+```
+
+Data-quality validation before this stage helps prevent invalid business relationships from entering the enterprise model.
+
+---
+
+# 14. High-Value Transaction Monitoring
+
+The simulator deliberately generates a small percentage of high-value transactions for operational monitoring and alert testing.
+
+Approximately **3% of generated transactions** can be generated within a suspicious high-value range.
 
 Example:
 
+```text
+100,000 – 200,000
 ```
-Total Transactions Loaded: 1,500,000
 
-Rejected:
-    Missing Account ID: 120
-    Invalid Currency: 500
-    Duplicate Transactions: 230
+These transactions are not necessarily “fraud” in the real-world sense.
+
+They are **synthetic suspicious transactions used to demonstrate monitoring and alerting functionality**.
+
+The downstream platform detects transactions meeting the configured threshold.
+
+```text
+Transaction
+     │
+     ▼
+SAT_TRANSACTION
+     │
+     ▼
+AMOUNT >= 100000
+     │
+     ▼
+Snowflake Alert
+     │
+     ├────────────► Alert Log
+     │
+     └────────────► Notification
 ```
-# 9. Final Objective
 
-The goal of data quality processing is to transform unreliable operational data into trusted enterprise data that can support banking analytics, reporting, and decision-making.
+This demonstrates how data-quality and operational-monitoring concepts can work together within a banking data platform.
 
+---
 
+# 15. Streaming Data Quality
+
+The streaming pipeline introduces additional considerations because transactions arrive continuously.
+
+The platform therefore needs to consider:
+
+* Duplicate events
+* Missing attributes
+* Invalid relationships
+* Unexpected transaction values
+* Out-of-order events
+* Incremental processing
+* Stream consumption
+* Task dependencies
+
+The downstream architecture processes newly arriving data incrementally:
+
+```text
+Snowpipe Streaming
+        │
+        ▼
+       RAW
+        │
+        ▼
+     BRONZE
+        │
+        ▼
+     SILVER
+        │
+        ▼
+ Data Vault 2.0
+```
+
+Snowflake Streams and Tasks allow the downstream layers to process changes without rebuilding the complete dataset.
+
+---
+
+# 16. Data Quality Monitoring
+
+The platform can be extended to track data-quality metrics such as:
+
+* Total records processed
+* Records rejected
+* Duplicate records
+* Missing required fields
+* Invalid values
+* Referential-integrity failures
+* Standardization failures
+* Suspicious transactions
+
+Example monitoring output:
+
+```text
+Transactions Processed:       1,500,000
+
+Quality Issues:
+
+Missing Account ID:                  120
+Invalid Currency:                    500
+Duplicate Transactions:             230
+Invalid Relationships:                75
+Suspicious Transactions:          45,000
+```
+
+These metrics provide visibility into the quality of incoming source data and the effectiveness of the transformation pipeline.
+
+---
+
+# 17. Quality Processing Philosophy
+
+The project follows a progressive data-quality approach:
+
+```text
+SOURCE
+  │
+  ▼
+PROFILE
+  │
+  ▼
+VALIDATE
+  │
+  ▼
+STANDARDIZE
+  │
+  ▼
+DEDUPLICATE
+  │
+  ▼
+RELATIONSHIP VALIDATION
+  │
+  ▼
+TRUSTED DATA
+```
+
+The objective is not to make the source data artificially perfect.
+
+Instead, the platform demonstrates how an enterprise Data Engineering system can receive imperfect data and progressively transform it into trusted information.
+
+---
+
+# 18. Final Data Quality Architecture
+
+The complete data-quality architecture is:
+
+```text
+                  BANKING SIMULATOR
+                         │
+                         ▼
+                 Imperfect Source Data
+                         │
+                         ▼
+                       RAW
+                         │
+                         │ Preserve Source
+                         ▼
+                      BRONZE
+                         │
+                         │ Structure
+                         ▼
+                 Quality Processing
+                         │
+          ┌──────────────┼──────────────┐
+          │              │              │
+          ▼              ▼              ▼
+       Validate     Standardize    Deduplicate
+          │              │              │
+          └──────────────┼──────────────┘
+                         ▼
+                      SILVER
+                         │
+                         │ Trusted Data
+                         ▼
+                  DATA VAULT 2.0
+                       GOLD
+                         │
+              ┌──────────┴──────────┐
+              │                     │
+              ▼                     ▼
+          Analytics            Monitoring
+                                    │
+                                    ▼
+                               Alerts /
+                              Notifications
+```
+
+---
+
+# 19. Final Objective
+
+The objective of the data-quality process is to transform imperfect synthetic banking source data into **trusted, standardized, validated, and historically modeled enterprise data**.
+
+The platform demonstrates how data quality is not a single transformation step, but a continuous process spanning:
+
+```text
+Generation
+     ↓
+Ingestion
+     ↓
+Profiling
+     ↓
+Validation
+     ↓
+Standardization
+     ↓
+Deduplication
+     ↓
+Relationship Validation
+     ↓
+Data Vault Modeling
+     ↓
+Analytics & Monitoring
+```
+
+This approach provides the foundation for reliable banking analytics, historical tracking, operational monitoring, and downstream Data Engineering workloads.
